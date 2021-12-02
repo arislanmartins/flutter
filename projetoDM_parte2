@@ -1,0 +1,1522 @@
+import 'dart:ui';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+var usuarios = ['admin'];
+String atualUser = '';
+var senhas = ['12345678'];
+
+void main() {
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Projeto D.M.',
+
+      //
+      // ROTAS DE NAVEGAÇÃO
+      //
+      initialRoute: 'login',
+      routes: {
+        'login': (context) => TelaLogin(),
+        't0': (context) => TelaMenu(),
+        't1': (context) => TelaPrincipal(),
+        't2': (context) => TelaCadastro(),
+        't3': (context) => TelaSugestao(),
+        't4': (context) => TelaDoacao(),
+        't5': (context) => HistoricoSugestao(),
+        // ----------------------------------------
+        'tl1': (context) => TelaLivro1(),
+        'tl2': (context) => TelaLivro2(),
+        'tl3': (context) => TelaLivro3(),
+        'tl4': (context) => TelaLivro4(),
+        'tl5': (context) => TelaLivro5(),
+        'tl6': (context) => TelaLivro6(),
+        'tl7': (context) => TelaLivro7(),
+        'tl8': (context) => TelaLivro8(),
+        'tl9': (context) => TelaLivro9(),
+        'tl10': (context) => TelaLivro10(),
+      },
+    ),
+  );
+}
+
+void verificaUsuario() {}
+//
+// TELA LOGIN
+//
+
+class TelaLogin extends StatefulWidget {
+  const TelaLogin({Key? key}) : super(key: key);
+
+  @override
+  _TelaLoginState createState() => _TelaLoginState();
+}
+
+class _TelaLoginState extends State<TelaLogin> {
+  TextEditingController txtEmail = TextEditingController();
+  TextEditingController txtSenha = TextEditingController();
+
+  var formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: EdgeInsets.all(20),
+        child: Form(
+          key: formKey,
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            backgroundColor: Colors.deepPurpleAccent,
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Sobre',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    color: Colors.black,
+                                    backgroundColor: Colors.blueAccent,
+                                  ),
+                                ),
+                                Container(
+                                  width: 70,
+                                ),
+                                Column(
+                                  children: [
+                                    Image.asset(
+                                      "images/arislan.jpg",
+                                      height: 100.0,
+                                    ),
+                                    Text('Arislan M.'),
+                                  ],
+                                )
+                              ],
+                            ),
+                            content: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Divider(),
+                                Text(
+                                  'Tema:\n - Biblioteca',
+                                  textAlign: TextAlign.justify,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                  ),
+                                ),
+                                Container(
+                                  height: 50,
+                                ),
+                                Text(
+                                  'Objetivo:\n - Disponibilizar livros gratuitamente aos usuários',
+                                  textAlign: TextAlign.justify,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    icon: Icon(Icons.quiz),
+                  ),
+                ],
+              ),
+              Image.asset(
+                "images/book.png",
+                height: 200.0,
+                //fit: BoxFit.fill,
+              ),
+              Text.rich(
+                TextSpan(
+                  text: ('A.M. LIBRARY'),
+                  style: TextStyle(
+                    color: Colors.black,
+                    backgroundColor: Colors.blueAccent,
+                    fontSize: 24,
+                    letterSpacing: 0,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        blurRadius: 2,
+                        offset: Offset.fromDirection(45),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                height: 35,
+              ),
+              campoTexto('Email', txtEmail, false),
+              campoTexto('Senha', txtSenha, true),
+              ElevatedButton(
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all<Size>(
+                      Size(double.infinity, 50)),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.deepPurple),
+                ),
+                child: Text('Entrar'),
+                onPressed: () {
+
+                  login(txtEmail.text, txtSenha.text);
+                  /*
+                  // Executar o validador dos campos de texto
+                  //
+                  for (int i = 0; i <= usuarios.length; i++)
+                    if (txtUsuario.text == usuarios[i] &&
+                        txtSenha.text == senhas[i]) {
+                      atualUser = txtUsuario.text;
+                      Navigator.pushNamed(context, 't0');
+                    }
+                  */
+                },
+              ),
+              Divider(),
+              ElevatedButton(
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all<Size>(
+                      Size(double.infinity, 50)),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.deepPurple),
+                ),
+                child: Text('Cadastrar'),
+                onPressed: () {
+                  Navigator.pushNamed(context, 't2');
+                },
+              ),
+              // btnEntrar('Entrar', 't1'),
+              Divider(),
+              //btnCadastrar('Cadastrar'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  //
+  // LOGIN com Firebase Auth
+  //
+  void login(email, senha){
+
+    FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: senha).then((value) { 
+      Navigator.pushNamed(context, 't0');
+    }).catchError((erro){
+      var mensagem = '';
+      if (erro.code == 'user-not-found'){ 
+        mensagem = 'ERRO: Usuário não encontrado!';
+      } else if (erro.code == 'wrong-password'){ 
+        mensagem = 'ERRO: Usuário ou senha inválido';
+      } else if (erro.code == 'invalid-email'){ 
+        mensagem = 'ERRO: Email inválido!';
+      } else {
+        mensagem = erro.message;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar( 
+        SnackBar( 
+          content: Text(mensagem),
+          duration: Duration(seconds: 2),
+        )
+      );
+    });
+  }
+}
+
+//
+// TELA CADASTRO
+//
+
+class TelaCadastro extends StatefulWidget {
+  const TelaCadastro({Key? key}) : super(key: key);
+
+  @override
+  _TelaCadastroState createState() => _TelaCadastroState();
+}
+
+class _TelaCadastroState extends State<TelaCadastro> {
+  TextEditingController txtNomeCompleto = TextEditingController();
+  TextEditingController txtSenha = TextEditingController();
+  TextEditingController txtEmail = TextEditingController();
+  TextEditingController txtCPF = TextEditingController();
+  TextEditingController txtTelefone = TextEditingController();
+
+  var formKey2 = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CADASTRO DE USUÁRIO'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: Form(
+          key: formKey2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Campo nome completo
+              TextFormField(
+                keyboardType: TextInputType.text,
+                controller: txtNomeCompleto,
+                decoration: InputDecoration(
+                  labelText: ('Informe o nome completo'),
+                  labelStyle: TextStyle(color: Colors.black),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                //
+                // VALIDADOR
+                //
+                /*validator: (value) {
+                  if (value == '') return 'Favor informar o nome completo';
+                  for (int i = 0; i < usuarios.length; i++) {
+                    if (usuarios[i] == value)
+                      return 'Nome de usuário já utilizado, favor escolher outro!';
+                  }
+                  return null;
+                },*/
+              ),
+              Divider(),
+
+              // Campo CPF
+              TextFormField(
+                keyboardType: TextInputType.text,
+                controller: txtCPF,
+                decoration: InputDecoration(
+                  labelText: ('Informe o CPF'),
+                  labelStyle: TextStyle(color: Colors.black),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+              Divider(),
+
+              // Campo telefone
+              TextFormField(
+                keyboardType: TextInputType.text,
+                controller: txtTelefone,
+                decoration: InputDecoration(
+                  labelText: ('Informe o telefone'),
+                  labelStyle: TextStyle(color: Colors.black),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+              Divider(),
+
+              // Campo email
+              TextFormField(
+                keyboardType: TextInputType.text,
+                controller: txtEmail,
+                decoration: InputDecoration(
+                  labelText: ('Informe o e-mail'),
+                  labelStyle: TextStyle(color: Colors.black),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+              Divider(),
+
+              // Campo senha
+              TextFormField(
+                keyboardType: TextInputType.text,
+                controller: txtSenha,
+                decoration: InputDecoration(
+                  labelText: ('Informe a senha'),
+                  labelStyle: TextStyle(color: Colors.black),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                //
+                // VALIDADOR
+                //
+                validator: (value) {
+                  if (value!.length < 8)
+                    return 'Favor, inserir uma senha com no mínimo 8 caracteres!';
+                  return null;
+                },
+              ),
+              Divider(),
+              btnCadastrar('Cadastrar'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    //void criarConta(){}
+  }
+
+  Widget btnCadastrar(rotulo) {
+    return ElevatedButton(
+      style: ButtonStyle(
+        minimumSize: MaterialStateProperty.all<Size>(Size(double.infinity, 50)),
+        backgroundColor: MaterialStateProperty.all<Color>(Colors.deepPurple),
+      ),
+      child: Text(rotulo),
+      onPressed: () {
+        
+        FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: txtEmail.text, 
+      password: txtSenha.text,
+    ).then((value) {
+      // Armazenar dados do usuário
+      FirebaseFirestore.instance
+        .collection('usuarios')
+        .add({
+          'nome'      : txtNomeCompleto.text,
+          'email'     : txtEmail.text,
+          'telefone'  : txtTelefone.text,
+          'cpf'       : txtCPF.text,
+        }
+      ).then((value) { 
+        ScaffoldMessenger.of(context).showSnackBar( 
+          SnackBar(
+            content: Text('Usuário criado com sucesso!'),
+            duration: Duration(seconds: 2),
+          )
+        );
+        Navigator.pop(context);
+      });
+
+    }).catchError((erro){
+      if (erro.code == 'email-already-in-use'){
+        ScaffoldMessenger.of(context).showSnackBar( 
+          SnackBar( 
+            content: Text('Erro: o email informado já está em uso!'),
+            duration: Duration(seconds: 2)));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar( 
+          SnackBar( 
+            content: Text('Erro: ${erro.message}'),
+            duration: Duration(seconds: 2)));
+      }
+    });
+
+
+
+
+        // criarConta(txtNomeCompleto.text, txtEmail.text, txtCPF.text, txtTelefone.text, txtSenha.text);
+        // Navigator.pushNamed(context, 'login');
+        /*
+        if (formKey2.currentState!.validate()) {
+          setState(() {
+            usuarios.add(txtEmail.text);
+            senhas.add(txtSenha.text);
+          });
+          caixaDialogo('Usuário criado com sucesso!');
+        }*/
+      },
+    );
+  }
+
+/*
+  void criarConta(nome, email, cpf, telefone, senha){
+
+    
+  }*/
+
+  caixaDialogo(msg) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Resultado'),
+          content: Text(msg),
+          actions: [
+            TextButton(
+              child: Text('Fechar'),
+              onPressed: () {
+                Navigator.pushNamed(context, 'login');
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+//
+// TELA MENU
+//
+
+class TelaMenu extends StatefulWidget {
+  const TelaMenu({Key? key}) : super(key: key);
+
+  @override
+  _TelaMenuState createState() => _TelaMenuState();
+}
+
+class _TelaMenuState extends State<TelaMenu> {
+  int selectedRadio = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedRadio = 0;
+  }
+
+  setSelectedRadio(var val) {
+    setState(() {
+      selectedRadio = val;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('BEM-VINDO: $atualUser'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.deepPurpleAccent,
+                /*boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple,
+                  ),
+                ],*/
+              ),
+              child: Row(
+                children: [
+                  Radio(
+                    value: 1,
+                    groupValue: selectedRadio,
+                    activeColor: Colors.orange,
+                    onChanged: (value) {
+                      setSelectedRadio(value);
+                    },
+                  ),
+                  SizedBox(width: 10.0),
+                  Text('Ir para biblioteca'),
+                ],
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Row(
+                children: [
+                  Radio(
+                    value: 2,
+                    groupValue: selectedRadio,
+                    activeColor: Colors.green,
+                    onChanged: (value) {
+                      setSelectedRadio(value);
+                    },
+                  ),
+                  SizedBox(width: 10.0),
+                  Text('Fazer uma sugestão'),
+                ],
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.deepPurpleAccent,
+              ),
+              child: Row(
+                children: [
+                  Radio(
+                    value: 3,
+                    groupValue: selectedRadio,
+                    activeColor: Colors.blue,
+                    onChanged: (value) {
+                      setSelectedRadio(value);
+                    },
+                  ),
+                  SizedBox(width: 10.0),
+                  Text('Realizar doação'),
+                ],
+              ),
+            ),
+            Divider(),
+            ElevatedButton(
+              style: ButtonStyle(
+                minimumSize:
+                    MaterialStateProperty.all<Size>(Size(double.infinity, 50)),
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(Colors.deepPurple),
+              ),
+              onPressed: () {
+                if (selectedRadio == 1) {
+                  Navigator.pushNamed(context, 't1');
+                } else if (selectedRadio == 2) {
+                  Navigator.pushNamed(context, 't3');
+                } else {
+                  Navigator.pushNamed(context, 't4');
+                }
+              },
+              child: Text('Entrar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA PRINCIPAL
+//
+
+class TelaPrincipal extends StatefulWidget {
+  const TelaPrincipal({Key? key}) : super(key: key);
+
+  @override
+  _TelaPrincipalState createState() => _TelaPrincipalState();
+}
+
+class _TelaPrincipalState extends State<TelaPrincipal> {
+  // Lista estática que contém os livros disponíveis para leitura
+  var livros = [];
+  var telasLivros = [];
+
+  @override
+  void initState() {
+    livros.add("Dom Quixote, Miguel de Cervantes, 1605");
+    livros.add("Guerra e Paz, Liev Tolstói, 1869");
+    livros.add("A Montanha Mágica, Thomas Mann, 1924");
+    livros.add("Cem Anos de Solidão, Gabriel García Márquez, 1967");
+    livros.add("Ulisses, James Joyce, 1922");
+    livros.add("Em Busca do Tempo Perdido, Marcel Proust, 1913");
+    livros.add("A Divina Comédia, Dante Alighieri, 1321");
+    livros.add("O Homem sem Qualidades, Robert Musil, 1930-1943");
+    livros.add("O Processo, Franz Kafka, 1925");
+    livros.add("O Som e a Fúria, William Faulkner, 1929");
+    for (int i = 1; i <= 10; i++) {
+      telasLivros.add('tl' + i.toString());
+    }
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('BOA LEITURA!'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: ListView.builder(
+          // Definir a quantidade de itens
+          itemCount: livros.length,
+          // Definir a aparência dos itens da lista
+          itemBuilder: (context, index) {
+            return Card(
+              elevation: 10,
+              shadowColor: Colors.blue.shade200,
+              child: ListTile(
+                title: Text(
+                  livros[index],
+                  style: TextStyle(fontSize: 22),
+                ),
+                trailing: IconButton(
+                  icon: Icon(Icons.book),
+                  onPressed: () {
+                    Navigator.pushNamed(context, telasLivros[index]);
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA SUGESTÃO
+//
+
+class TelaSugestao extends StatefulWidget {
+  const TelaSugestao({Key? key}) : super(key: key);
+
+  @override
+  _TelaSugestaoState createState() => _TelaSugestaoState();
+}
+
+class _TelaSugestaoState extends State<TelaSugestao> {
+  var sugLivro = TextEditingController();
+  var melhoriasApp = TextEditingController();
+
+  //
+  // RETORNAR UM DOCUMENTO a parti do ID
+  //
+  getDocumentByID(id) async{
+    await FirebaseFirestore.instance.collection('sugestoes')
+    .doc(id).get().then((doc){ 
+      sugLivro.text = doc.get('livro');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    //
+    // RECUPERAR o ID do Livro
+    // 
+    var id = ModalRoute.of(context)?.settings.arguments;
+    if (id != null){ 
+      if (sugLivro.text.isEmpty){
+        getDocumentByID(id);
+      }
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAIXINHA DE SUGESTÕES'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Divider(),
+            Image.asset(
+              'images/ideas.png',
+              height: 100.0,
+            ),
+            Divider(),
+            TextField(
+              controller: sugLivro,
+              decoration: InputDecoration(
+                labelText: ('Sugestão de livro'),
+                labelStyle: TextStyle(color: Colors.black),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            Divider(),
+            TextField(
+              controller: melhoriasApp,
+              decoration: InputDecoration(
+                labelText: ('Melhoria no APP'),
+                labelStyle: TextStyle(color: Colors.black),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            
+            SizedBox(height: 10.0),
+            ElevatedButton(
+              style: ButtonStyle(
+                minimumSize:
+                    MaterialStateProperty.all<Size>(Size(double.infinity, 50)),
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(Colors.deepPurple),
+              ),
+              onPressed: () {
+
+                if (id == null){
+                  //
+                  // ADICIONAR DOCUMENTO (SUGESTÃO NO FILESTORE)
+                  //
+                  FirebaseFirestore.instance.collection('sugestoesLivros').add( 
+                    { 
+                      'livro' : sugLivro.text,
+                    }
+                  );
+                } else { 
+                  //
+                  // ATUALIZAR DOCUMENTO (SUGESTÃO NO FILESTORE)
+                  //
+                  FirebaseFirestore.instance.collection('sugestoes').doc(id.toString()).set( 
+                    { 
+                      'livro' : sugLivro.text,
+                    }
+                  );
+                }
+                //
+                // ATUALIZAR DOCUMENTO (MELHORIAS NO FILESTORE)
+                //
+                FirebaseFirestore.instance.collection('melhoriasApp').add( 
+                  { 
+                    'melhoria' : melhoriasApp.text,
+                  }
+                );
+
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Notificação'),
+                      content: Text('Sugestões enviadas com sucesso!'),
+                      actions: [
+                        TextButton(
+                          child: Text('Fechar'),
+                          onPressed: () {
+                            sugLivro.text = '';
+                            melhoriasApp.text = '';
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Text('Enviar'),
+            ),
+            Divider(),
+            ElevatedButton(
+              style: ButtonStyle(
+                minimumSize:
+                    MaterialStateProperty.all<Size>(Size(double.infinity, 50)),
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(Colors.deepPurple),
+              ),
+              child: Text('Ver livros sugeridos'),
+              onPressed: (){
+                 Navigator.pushNamed(context, 't5');
+              },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+//
+// TELA HISTÓRICO SUGESTÕES
+//
+
+class HistoricoSugestao extends StatefulWidget {
+  const HistoricoSugestao({ Key? key }) : super(key: key);
+
+  @override
+  _HistoricoSugestaoState createState() => _HistoricoSugestaoState();
+}
+
+class _HistoricoSugestaoState extends State<HistoricoSugestao> {
+  late CollectionReference sugestoes;
+
+  @override
+  void initState(){ 
+    super.initState();
+
+    sugestoes = FirebaseFirestore.instance.collection('sugestoes');
+  }
+
+  //
+  // ITEM LISTA
+  // DEFINIR A APARÊNCIA DE CADA ITEM DA LISTA
+  Widget itemLista(item){
+    String livro = item.data()['livro'];
+
+    return ListTile( 
+      title: Text(livro,
+      style: TextStyle( 
+        fontSize: 30,
+      ),),
+      trailing: IconButton(
+        icon: Icon(Icons.delete),
+        onPressed: (){ 
+          sugestoes.doc(item.id).delete();
+        },
+      ),
+      onTap: (){
+        Navigator.pushNamed(context, 't3', arguments: item.id);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('HISTÓRICO DE SUGESTÕES'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      // Exibição os documentos da coleção de sugestões
+      body: StreamBuilder<QuerySnapshot>( 
+        // Fonte de dados (coleção)
+        stream: sugestoes.snapshots(),
+
+        // Exibir os dados retornados
+        builder: (context, snapshot){ 
+          switch(snapshot.connectionState){ 
+            case ConnectionState.none:
+              return Center(child: Text('Não foi possível conectar ao Firebase'));
+
+            case ConnectionState.waiting:
+              return Center(child: CircularProgressIndicator());
+            
+            // Dados recebidos
+            default:
+              final dados = snapshot.requireData;
+              return ListView.builder(
+                itemCount: dados.size,
+                itemBuilder: (context, index){ 
+                  return itemLista(dados.docs[index]);
+                }
+              );
+          }
+        }
+      
+      ),
+      backgroundColor: const Color.fromRGBO(168, 137, 255, 1.0),
+      );
+  }
+}
+
+//
+// TELA DOAÇÃO
+//
+
+class TelaDoacao extends StatefulWidget {
+  const TelaDoacao({Key? key}) : super(key: key);
+
+  @override
+  _TelaDoacaoState createState() => _TelaDoacaoState();
+}
+
+class _TelaDoacaoState extends State<TelaDoacao> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('FAÇA UM PIX!'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(
+              'images/qrcode.png',
+              height: 200.0,
+            ),
+            Divider(),
+            Text(
+              'Copie o código QR para fazer uma DOAÇÃO!',
+              style:
+                  TextStyle(backgroundColor: Colors.orange[400], fontSize: 20),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+//
+// TELA LIVRO 1: Dom Quixote, Miguel de Cervantes, 1605
+//
+
+class TelaLivro1 extends StatefulWidget {
+  const TelaLivro1({Key? key}) : super(key: key);
+
+  @override
+  _TelaLivro1State createState() => _TelaLivro1State();
+}
+
+class _TelaLivro1State extends State<TelaLivro1> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAPÍTULO 1'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Container(
+            child: Text(
+                'Que trata da condição e exercício do famoso fidalgo D. Quixote de La Mancha. NUM lugar da Mancha, de cujo nome não quero lembrar-me, vivia, não há muito, um fidalgo, dos de lança em cabido, adarga antiga, rocim fraco, e galgo corredor. Passadio, olha seu tanto mais de vaca do que de carneiro, as mais das ceias restos da carne picados com sua cebola e vinagre, aos sábados outros sobejos ainda somenos, lentilhas às sextas-feiras, algum pombito de crescença aos domingos, consumiam três quartos do seu haver. O remanescente, levavam-no saio de belarte, calças de veludo para as festas, com seus pantufos do mesmo; e para os dias de semana o seu bellori do mais fino. Tinha em casa uma ama que passava dos quarenta, uma sobrinha que não chegava aos vinte, e um moço da poisada e de porta a fora, tanto para o trato do rocim, como para o da fazenda. Orçava na idade o nosso fidalgo pelos cinqüenta anos. Era rijo de compleição, seco de carnes, enxuto de rosto, madrugador, e amigo da caça. Querem dizer que tinha o sobrenome de Quijada ou Quesada (que nisto discrepam algum tanto os autores que tratam da matéria), ainda que por conjecturas verossímeis se deixa entender que se chamava Quijana. Isto porém pouco faz para a nossa história; basta que, no que tivermos de contar, não nos desviemos da verdade nem um til. É, pois, de saber que este fidalgo, nos intervalos que tinha de ócio (que eram os mais do ano) se dava a ler livros de cavalaria, com tanta afeição e gosto, que se esqueceu quase de todo do exercício da caça, e até da administração dos seus bens; e a tanto chegou a sua curiosidade e desatino neste ponto, que vendeu muitas courelas de semeadura para comprar livros de cavalarias que ler; com o que juntou em casa quantos pôde apanhar daquele gênero. Dentre todos eles, nenhuns lhe pareciam tão bem como os compostos pelo famoso Feliciano da Silva, porque a clareza da sua prosa e aquelas intrincadas razões suas lhe pareciam de pérolas; e mais, quando chegava a ler aqueles requebros e cartas de desafio, onde em muitas partes achava escrito: a razão da sem-razão que à minha razão se faz, de tal maneira a minha razão enfraquece, que com razão me queixo da vossa formosura; e também quando lia: os altos céus que de vossa divindade divinamente com as estrelas vos fortificam, e vos fazem merecedora do merecimento que merece a vossa grandeza. Com estas razões perdia o pobre cavaleiro o juízo; e desvelava-se por entendê-las, e desentranhar-lhes o sentido, que nem o próprio Aristóteles o lograria, ainda que só para isso ressuscitara. Não se entendia lá muito bem com as feridas que D. Belianis dava e recebia, por imaginar que, por grandes facultativos que o tivessem curado, não deixaria de ter o rosto e todo o corpo cheio de cicatrizes e costuras. Porém, contudo louvava no autor aquele acabar o seu livro com a promessa daquela inacabável aventura; e muitas vezes lhe veio desejo de pegar na pena, e finalizar ele a coisa ao pé da letra, como ali se promete e sem dúvida alguma o fizera, e até o sacara à luz, se outros maiores e contínuos pensamentos lho não estorvaram...'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA LIVRO 2: Guerra e Paz, Liev Tolstói, 1869
+//
+
+class TelaLivro2 extends StatefulWidget {
+  const TelaLivro2({Key? key}) : super(key: key);
+
+  @override
+  _TelaLivro2State createState() => _TelaLivro2State();
+}
+
+class _TelaLivro2State extends State<TelaLivro2> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAPÍTULO 1'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Container(
+            child: Text(
+                'Em fins de 1811 principiaram os armamentos intensivos e a concentração das forças da Europa ocidental e, em 1812, estas forças, ou seja, milhões de homens, no número das quais se contava transportes e abastecimentos, puseram-se em marcha do ocidente para o oriente, em direcção às fronteiras da Rússia, para onde se encaminhavam, igualmente, a partir de 1811, os exércitos russos. No dia 12 de Junho, os exércitos da Europa ocidental atravessaram a fronteira e a guerra principiou, isto é, produziu-se então um acontecimento em desacordo completo com a razão e a própria natureza do homem. Estes milhões de homens praticaram, em relação uns aos outros, tão grande número de abominações, de fraudes, de traições, de roubos, de falsificações de moeda, de pilhagens, de incêndios e de morticínios como não há exemplo nos arquivos dos tribunais do mundo inteiro, funcionando há séculos, e sem que, no entanto, durante todo este período, aqueles que cometeram tais crimes fossem considerados, realmente, criminosos. Que produziu tão monstruoso acontecimento? Quais as suas causas? Os historiadores, com uma segurança ingénua, foram buscá-las ao insulto de que foi vítima o duque de Oldemburgo, não observância do bloqueio continental, à ambição de Napoleão, à resistência de Alexandre, aos erros da diplomacia, etc. Por conseguinte, teria bastado que Metternich, Rumiantsov ou Talleyrand, entre uma recepção na corte e uma reunião política, conviessem em redigir com arte uma nota bem cozinhada ou que Napoleão pegasse na pena para escrever a Alexandre: «Senhor meu irmão, consinto em devolver o ducado ao duque de Oldemburgo», para que não tivesse havido guerra. É natural que fosse este o ponto de vista dos contemporâneos. Concebe-se que Napoleão tivesse atribuído a guerra às intrigas da Inglaterra, como declarou na ilha de Santa Helena. Admite-se que os membros do Parlamento inglês pensassem que deveriam ir buscar-se-lhe as causas à ambição de Napoleão; que o duque de Oldemburgo as tivesse...'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA LIVRO 3: A Montanha Mágica, Thomas Mann, 1924
+//
+
+class TelaLivro3 extends StatefulWidget {
+  const TelaLivro3({Key? key}) : super(key: key);
+
+  @override
+  _TelaLivro3State createState() => _TelaLivro3State();
+}
+
+class _TelaLivro3State extends State<TelaLivro3> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAPÍTULO 1'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Container(
+            child: Text(
+                'A Chegada Um jovem singelo viajava, em pleno verão, de Hamburgo, sua cidade natal, a DavosPlatz, no cantão dos Grisões. Ia de visita, por três semanas. Mas de Hamburgo até essas alturas a viagem é longa, demasiado longa, na verdade, para uma estada tão curta. É preciso atravessar diversos estados, subindo e descendo, do planalto da Alemanha meridional até a beira do lago de Constança, cujas ondas saltitantes são transpostas de navio, por sobre abismos outrora considerados insondáveis. A partir dali torna-se demorada a viagem que até esse ponto se realizava rapidamente, em linha quase reta. Há delongas e complicações. Na localidade de Rorschach, já em território suíço, voltamos a confiar-nos à viação férrea; mas, por enquanto não se progride além de Landquart, pequena estação alpina, onde se precisa fazer baldeação. É um trem de bitola estreita o que ali tomamos depois de prolongada espera numa paisagem varrida pelo vento e desprovida de encantos. No momento em que se põe em movimento a locomotiva de pequeno porte, mas evidentemente de extraordinária força de tração, começa a parte deveras aventurosa da viagem, uma escalada brusca e penosa que parece não ter fim. A estação de Landquart acha-se situada a uma altura relativamente moderada. A partir dela, porém, entra-se na própria montanha, por uma estrada rochosa, áspera, angustiante. Hans Castorp – eis o nome do referido jovem – estava sozinho num pequeno compartimento forrado de cinza, onde também se encontravam sua maleta de couro de crocodilo (presente de seu tio e pai de criação, o cônsul Tienappel, cujo nome convém mencionar desde já), bem como o casaco de inverno, a balouçar suspenso num gancho, e o cobertor de viagem enrolado. Estava sentado junto à janela aberta, e como a tarde se vinha tornando cada vez mais fresca, levantara rapaz mimado e franzino que era a gola do sobretudo de verão, forrado de seda e de corte amplo e moderno. A seu lado, no assento, jazia uma brochura intitulada Ocean Steamships, na qual Hans Castorp, durante as primeiras horas de viagem, de vez em quando lançara um olhar; agora, porém, o livro permanecia ali abandonado, enquanto o hálito da locomotiva arquejante, ao entrar pela janela, salpicava-lhe a capa de partículas de carvão. Dois dias de viagem apartam um homem e especialmente um jovem que ainda não criou raízes firmes na vida do seu mundo cotidiano, de tudo quanto ele costuma chamar seus deveres, interesses, cuidados e projetos; apartam-no muito mais do que esse jovem imaginava, enquanto um fiacre o levava à estação. O espaço que, girando e fugindo, se roja de permeio entre ele e seu lugar de origem, revela forças que geralmente se julgam privilégio do tempo; produz de hora em hora novas metamorfoses íntimas, muito parecidas com aquelas que o tempo origina, mas em certo sentido mais intensas ainda. Tal qual o tempo, o espaço gera o olvido; porém o faz, desligando o indivíduo das suas relações e pondo-o num estado livre, primitivo; chega até mesmo a transformar, num só golpe, um pedante ou um burguesote numa espécie de vagabundo. Dizem que o tempo é como o rio Letes; mas também o ar de paragens longínquas representa uma poção semelhante, e seu efeito, conquanto menos radical, não deixa de ser mais rápido. Hans Castorp ia passando por experiências análogas. Não tivera a intenção de levar essa viagem muito a sério e de entregar-se totalmente a ela. Propusera-se liquidá-la depressa, porque tinha que ser feita, depois regressar para casa tal como partira, e retomar a sua vida anterior exatamente no ponto em que a abandonara por um instante. Ainda ontem se movimentara dentro do costumeiro círculo de idéias; ocupara-se com os acontecimentos mais recentes – o seu exame final – e com o futuro imediato – sua entrada na vida prática, como funcionário da firma Tunder & Wilms (Estaleiros, Fábrica de Máquinas e Caldeiras). Com o máximo de impaciência que seu temperamento lhe permitia, procurara olhar para além das semanas vindouras. Nesse momento, porém, parecia-lhe que as circunstâncias exigiam dele plena atenção, não lhe sendo licito menosprezá-las. Essa sensação de ser alçado a regiões cujos ares nunca respirara, e onde, como sabia, reinavam condições de vida particularmente rarefeitas e reduzidas, a que em absoluto não estava acostumado – essa sensação começava a excitá-lo, a enchê-lo de certa angústia. O torrão natal e a rotina de sempre haviam ficado não somente para trás, muito para trás, mas sobretudo a grande profundidade abaixo dele; e a ascensão continuava a afastá-los mais ainda. Pairando entre eles e o desconhecido, Hans Castorp perguntava-se como passaria lá em cima. Talvez fosse imprudente e prejudicial para ele, que nascera a poucos metros acima do mar e se habituara ao ar da sua terra, deixar-se transportar tão subitamente a esses sítios extremos, sem pelo menos se demorar por alguns dias num lugar de altitude média. Ansiava por chegar ao fim da viagem; pois, uma vez lá em cima – pensava –, devia-se viver como em toda parte, sem que lhe fossem recordadas, como agora, durante a escalada, as esferas impróprias em que se encontrava. Hans Castorp olhou pela janela. O trem serpenteava, sinuoso, através de um desfiladeiro estreito. Viam-se os primeiros vagões, via-se a locomotiva vomitando, no seu esforço, golfadas de fumaça parda, esverdeada e negra que logo se dissipavam. Nas profundidades, à direita, murmurav...'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA LIVRO 4: Cem Anos de Solidão, Gabriel García Márquez, 1967
+//
+
+class TelaLivro4 extends StatefulWidget {
+  const TelaLivro4({Key? key}) : super(key: key);
+
+  @override
+  _TelaLivro4State createState() => _TelaLivro4State();
+}
+
+class _TelaLivro4State extends State<TelaLivro4> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAPÍTULO 1'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Container(
+            child: Text(
+                'MUITOS anos depois, diante do pelotão de fuzilamento, o Coronel Aureliano Buendía havia de recordar aquela tarde remota em que seu pai o levou para conhecer o gelo. Macondo era então uma aldeia de vinte casas de barro e taquara, construídas à margem de um rio de águas diáfanas que se precipitavam por um leito de pedras polidas, brancas e enormes como ovos pré-históricos. O mundo era tão recente que muitas coisas careciam de nome e para mencionálas se precisava apontar com o dedo. Todos os anos, pelo mês de março, uma família de ciganos esfarrapados plantava a sua tenda perto da aldeia e, com um grande alvoroço de apitos e tambores,dava a conhecer os novos inventos. Primeiro trouxeram o imã. Um cigano corpulento, de barba rude e mãos de pardal,* que se apresentou com o nome de Melquíades, fez uma truculenta demonstração pública daquilo que ele mesmo chamava de a oitava maravilha dos sábios alquimistas da Macedônia. Foi de casa em casa arrastando dois lingotes metálicos, e todo o mundo se espantou ao ver que os caldeirões, os tachos, as tenazes e os fogareiros caíam do lugar, e as madeiras estalavam com o desespero dos pregos e dos parafusos tentando se desencravar, e até os objetos perdidos há muito tempo apareciam onde mais tinham sido procurados, e se arrastavam em debandada turbulenta atrás dos ferros mágicos de Melquíades. “As coisas têm vida própria”, apregoava o cigano com áspero sotaque, “tudo é questão de despertar a sua alma.” José Arcadio Buendía, cuja desatada imaginação ia sempre mais longe que o engenho da natureza, e até mesmo além do milagre e da magia, pensou que era possível se servir daquela invenção inútil para desentranhar o ouro da terra. Melquíades, que era um homem honrado, preveniu-o: “Para isso não serve.” Mas José Arcadio Buendía não acreditava, naquele tempo, na honradez dos ciganos de modo que trocou o seu jumento e um rebanho de cabritos pelos dois lingotes imantados. Úrsula Iguaráni sua mulher, a que contava com aqueles animais para aumentar o raquítico patrimônio doméstico, não conseguiu dissuadi-lo. “Muito em breve vamos ter ouro de sobra para assoalhar a casa”, respondeu o marido. Durante vários meses empenhou-se em demonstrar o acerto das suas conjeturas. Explorou palmo a palmo a região, inclusive o fundo do rio, arrastando os dois lingotes de ferro e recitando em voz alta o conjuro de Melquíades. A única coisa que conseguiu desenterrar foi uma armadura do século XV, com todas as suas partes soldadas por uma camada de óxido, cujo interior tinha a ressonância oca de uma enorme cabaça cheia de pedras. Quando José Arcadio Buendía e os quatro homens da sua expedição conseguiram desarticular a armadura, encontraram um esqueleto calcificado que trazia pendurado no pescoço um relicário de cobre com um cacho de cabelo de mulher. Em março os ciganos voltaram. Desta vez traziam um óculos ao alcance e uma lupa do tamanho de um tambor, que exibiram como a última descoberta dos judeus de Amsterdam. Sentaram uma cigana num extremo da aldeia e instalaram o óculo de alcance na entrada da tenda. Mediante o pagamento cinco reais, o povo se aproximava do óculo e via a cigana ao alcance da mão. “A ciência eliminou as distâncias”, apregoava Melquíades. “Dentro em pouco o homem poderá ver acontece em qualquer lugar da terra, sem sair de sua casa.“ Num meio-dia ardente, fizeram uma assombrosa demonstração com a lupa gigantesca: puseram um montão de seco na metade da rua e atearam fogo nele pela concentração * No original manos de gorrión. Explicação do autor à tradutora: “O importante da imagem é que esse pássaro tem patas de ave de rapina, mas é bom e inofensivo. Melquíades também, por suas mãos, e à primeira vista, podia parecer uma ave de rapina, mas não o era, como se viu mais tarde.” dos raios solares. José Arcadio Buendía, que ainda não se consolara de todo do fracasso dos seus ímãs, concebeu a idéia de utilizar aquele invento como uma arma de guerra. Melquíades, outra vez, tratou de dissuadi-lo. Mas terminou os dois lingotes imantados e três peças de dinheiro colonial em troca da lupa. Úrsula chorou de consternação. Aquele dinheiro fazia parte de um cofre de moedas de ouro que seu pai acumulara em toda uma vida de privações e que havia enterrado debaixo da cama, à espera de uma boa ocasião para investi-las. José Arcadio Buendía nem sequer tentou consolá-la, entregue que estava por inteiro às suas experiências táticas, com a abnegação de um cientista e até mesmo com o risco da própria vida. Tentando demonstrar os efeitos da lupa na tropa inimiga, ele mesmo se expôs à concentração dos raios solares e sofreu queimaduras que se transfo rmaram em úlceras e demoraram muito tempo para sarar. Diante dos protestos da mulher, alarmada por tão perigosa inventiva por pouco não incendiou a casa. Passava longas horas no quarto, fazendo os cálculos das possibilidades estratégicas da nova arma, até que conseguiu compor um manual de uma assombrosa clareza didática e um poder de convicção irresistível. Enviou-o às autoridades, acompanhado de numerosos testemunhos sobre as suas experiências e de vários apêndices de desenhos explicativos, aos cuidados de um mensageiro que atravessou a serra, extraviou-se em pântanos desmesurados, subiu rios tormentosos e esteve a ponto de perecer sob o ataque das feras, o desespero e a peste, até encontrar um caminho que o levasse às mulas do correio. Embora a viagem à capital fosse naquele tempo quase impossível, José Arcadio Buendía prometia tentá-la logo que o Governo ordenasse, com o fim de fazer demonstrações práticas do seu invento diante dos poderes militares, e adestrá-los pessoalmente nas complicadas artes da guerra solar. Durante vários anos esperou a resposta. Por fim, cansado de esperar, lamentou-se diante de Melquíades do fracasso da sua iniciativa e o cigano, então, deu uma prova convincente de honradez: devolveu-lhe os dobrões em troca da lupa e deixou, para ele, além disso, uns mapas portugueses e vários instrumentos de navegação. De seu próprio punho e letra escreveu uma apertada síntese dos estudos do monge Hermann, que deixou à sua disposição para que pudesse se servir do astrolábio, da bússola e do sextante. José Arcadio Buendía passou os longos meses de chuva fechado num quartinho que construíra no fundo da casa, para que ninguém perturbasse as suas experiências. Tendo abandonado completamente as obrigações domésticas, permaneceu noites inteiras no quintal, vigiando o movimento dos astros, e quase sofreu uma insolação, por tentar estabelecer um método exato para determinar o meio-dia. Quando se tornou perito no uso e manejo dos seus instrumentos, passou a ter uma noção do espaço que lhe permitiu navegar por mares incógnitos, visitar territórios desabitados e travar relações com seres esplêndidos, sem necessidade de abandonar o seu gabinete. Foi por essa ocasião que adquiriu o hábito de falar sozinho, passeando pela casa sem se incomodar com ninguém, enquanto Úrsula e as crianças suavam em bicas na horta cuidando da banana e da taioba, do aipim e do inhame, do cará e da berinjela. De repente, sem anúncio prévio, a sua atividade febril se interrompeu e foi substituída por uma espécie de fascinação. Esteve vários dias como que enfeitiçado, repetindo para si mesmo em voz baixa um rosário de assombrosas conjeturas, sem dar crédito ao próprio entendimento. Por fim, numa terça-feira de dezembro, na hora do almoço, soltou de uma vez todo peso do seu tormento. As crianças haviam de recordar o resto da vida a augusta solenidade com que o pai se sentou na cabeceira da mesa, tremendo de febre, devastado pela prolongada vigília e pela pertinácia da sua imaginação, e revelou a eles a sua descoberta: — A terra é redonda como uma laranja. Úrsula perdeu a paciência. “Se você pretende ficar louco fique sozinho”, gritou. “Não tente incutir nas crianças as suas idéias de cigano.” José Arcadio Buendía, impassível, não se deixou amedrontar pelo desespero da mulher que, num impulso de cólera, destroçou o astrolábio contra o solo. Construiu outro, reuniu no quartinho os homens do povoado e demonstrou a eles, com teorias que acabaram sendo incompreensíveis para todos, a possibilidade de regressar ao ponto de partida navegando sempre para o Oriente. A aldeia inteira já estava convencida de que José Arcadio Buendía tinha perdido juízo, quando Melquíades chegou para pôr a coisa em pratos limpos. Ressaltou em público a inteligência daquele homem que, por pura especulação astronômica, construíra uma teoria já comprovada na prática, se bem que desconhecida até então em Macondo, e como uma prova da sua admiração deu lhe um presente que havia de exercer uma influência decisiva o futuro da aldeia: um laboratório de alquimia. Por essa época, Melquíades tinha envelhecido com uma rapidez assombrosa....'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA LIVRO 5: Ulisses, James Joyce, 1922
+//
+
+class TelaLivro5 extends StatefulWidget {
+  const TelaLivro5({Key? key}) : super(key: key);
+
+  @override
+  _TelaLivro5State createState() => _TelaLivro5State();
+}
+
+class _TelaLivro5State extends State<TelaLivro5> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAPÍTULO 1'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Container(
+            child: Text(
+                'Majestoso, o gorducho Buck Mulligan apareceu no topo da escada, trazendo na mão uma tigela com espuma sobre a qual repousavam, cruzados, um espelho e uma navalha de barba. Um penhoar amarelo, desamarrado, flutuando suavemente atrás dele no ar fresco da manhã. Ele ergueu a tigela e entoou: – Introibo ad altare Dei. Parado, ele perscrutou a escada sombria de caracol e gritou asperamente: – Suba, Kinch! Suba, seu temível jesuíta! Solenemente ele avançou para a plataforma de tiro. Olhou à volta e seriamente abençoou três vezes a torre, o terreno à volta e as montanhas que despertavam. Em seguida, avistando Stephen Dedalus, ele se inclinou em direção a ele e fez cruzes rápidas no ar, gorgolejando na garganta e sacudindo a cabeça. Contrariado e sonolento, Stephen Dedalus apoiou os braços no último degrau da escada e olhou friamente para o rosto sacolejante e gorgolejante que o abençoava, para a cabeça eqüina e os cabelos claros sem tonsura, tingidos e matizados como carvalho descorado. Buck Mulligan espreitou por um instante por baixo do espelho e depois cobriu a tigela rapidamente. – De volta pro quartel! – disse implacavelmente. E acrescentou em tom sacerdotal: – Pois isto, meus bem-amados, é a verdadeira cristina: corpo e alma e sangue e feridas. Música lenta, por favor. Fechem os olhos, senhores. Um momento. Um pequeno problema com esses corpúsculos brancos. Silêncio, todos. Ele olhou de soslaio para cima e soltou um longo e lento assobio de chamada, depois fez por um momento uma pausa em atenção enlevada, com seus dentes iguais e brancos brilhando aqui e ali pontilhados de ouro. Crisóstomo. Dois fortes assobios estridentes responderam através da calma. – Obrigado, meu velho – gritou vivamente. – Isto é o bastante. Desligue a corrente, está bem? Saltou fora da plataforma de tiro e olhou seriamente para o seu observador, juntando em volta das pernas as dobras soltas de seu penhoar. A cara rechonchuda e sombria e a queixada oval e taciturna lembravam um prelado, patrono das artes na Idade Média. Um sorriso agradável desabrochou em seus lábios. – A ironia das coisas! – disse ele alegremente. – Seu nome absurdo, um grego antigo! Ele apontou com o dedo num gesto amigável e se encaminhou para o parapeito rindo consigo mesmo. Stephen Dedalus se aproximou, acompanhou-o e a meio caminho cansado se sentou na beira da plataforma de tiro, observando-o enquanto ele apoiava o espelho no parapeito, molhava o pincel na tigela e passava a espuma na face e no pescoço. A voz alegre de Buck Mulligan prosseguia...'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA LIVRO 6: Em Busca do Tempo Perdido, Marcel Proust, 1913
+//
+
+class TelaLivro6 extends StatefulWidget {
+  const TelaLivro6({Key? key}) : super(key: key);
+
+  @override
+  TelaLivro6State createState() => TelaLivro6State();
+}
+
+class TelaLivro6State extends State<TelaLivro6> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAPÍTULO 1'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Container(
+            child: Text(
+                'Durante muito tempo, deitava-me cedo. Às vezes, mal apagada a vela, meus olhos se fechavam tão depressa que eu nem tinha tempo de pensar: "Vou dormir". E, meia hora depois, a idéia de que já era tempo de conciliar o sono me despertava: queria deixar o livro que julgava ainda ter nas mãos e assoprar a vela; dormindo, não havia deixado de refletir sobre o que acabara de ler, porém tais reflexões haviam tomado um aspecto um tanto singular; parecia-me que era de mim mesmo que o livro falava: uma igreja, um quarteto, a rivalidade de Francisco I e Carlos V. Essa crença sobrevivia por alguns segundos ao meu despertar; não ofendia a razão, mas pesava como escamas sobre os olhos, impedindo-os de perceber que a vela já não estava acesa. Depois, principiava a me parecer ininteligível, como, após a metempsicose, as idéias de uma existência anterior; o assunto do livro se desligava de mim, eu ficava livre para me adaptar ou não a ele; logo recobrava a vista e me surpreendia bastante por estar rodeado de uma obscuridade, suave e repousante para os olhos, porém ainda mais talvez para o espírito, ao qual surgia como uma coisa sem causa, incompreensível, como algo verdadeiramente obscuro. Perguntava-me que horas poderiam ser; ouvia o silvo dos trens que, mais ou menos afastado, como um canto de pássaro na floresta, assinalando as distâncias, me informava sobre a extensão da campina deserta onde o viajante se apressa em direção à próxima parada: o caminho que ele segue vai lhe ficar gravado na lembrança pela excitação de conhecer novos lugares, praticar atos inusitados, pela conversação recente e as despedidas sob a lâmpada estranha que o seguem ainda no silêncio da noite, e pela doçura próxima do regresso. Apoiava brandamente as faces contra as belas faces do travesseiro que, cheias e frescas, são como os rostos da nossa infância. Riscava um fósforo para ver o relógio. Quase meia-noite. É o momento em que o enfermo, que teve de viajar e ir dormir num hotel desconhecido, acordado por uma crise, se alegra ao distinguir debaixo da porta um raio de luz. Felicidade! Já é dia! Daqui a pouco os criados vão se levantar, poderá tocar a campainha, virão prestar-lhe socorro. A esperança de ser aliviado lhe dá coragem para suportar o sofrimento. Ainda agora pensou ouvir passos; os passos se aproximam e logo se afastam. E o fio de luz que estava sob a porta desapareceu. É meia-noite; acabam de apagar o gás; o último criado já se retirou e é preciso ficar a noite inteira sofrendo sem remédio. Voltava a adormecer, e às vezes só despertava por um breve instante, o suficiente para ouvir os estalos orgânicos da madeira dos móveis, para abrir os olhos e olhar ao caleidoscópio da escuridão, para saborear, graças a um momentâneo resplendor de consciência, o sonho em que estavam sumidos os móveis, o quarto, tudo aquilo do que eu não era mais que uma ínfima parte, tudo a cuja insensibilidade voltava eu muito em breve a me somar. Outras vezes, ao dormir, tinha retrocedido sem esforço a uma época para sempre acabada de minha vida primitiva, tinha-me encontrado novamente com um de meus medos de menino, como aquele de que meu tio me atirasse dos cachos de cabelo, e que se dissipou. Data que para mim assinala uma nova era. O dia que me cortaram isso. Este acontecimento havia esquecido durante o sonho, e voltava para minha lembrança logo que acertava em despertar para escapar das mãos de meu tio: mas, por via de precaução, envolvia a cabeça com o travesseiro antes de voltar ao mundo dos sonhos. Outras vezes, assim como Eva nasceu de uma costela de Adão, uma mulher nascia enquanto eu estava dormindo, de uma má postura de meu quadril. Sendo criatura filha do prazer estava a ponto de desfrutar, me parecia que era ela a que me oferecia isso. Meu corpo sentia no dela seu próprio calor, ia buscá-lo, e eu despertava. Todo o resto dos mortais me aparecia como coisa muito imprecisa junto desta mulher, da que me separasse fazia um instante: conservava ainda minha bochecha o calor de seu beijo e sentia-me dolorido pelo peso de seu corpo. Se, como acontecia algumas vezes, representava com o semblante de uma mulher que eu tinha conhecido na vida real, eu ia entregar-me com todo meu ser a este único fim: encontrá-la; quão mesmo essas pessoas que saem de viagem para ver com seus próprios olhos uma cidade desejada, imaginando-se que em uma coisa real saboreia-se o encanto do sonhado. Pouco a pouco a lembrança dissipava; já estava esquecida a criatura de meu sonho....'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA LIVRO 7: A Divina Comédia, Dante Alighieri, 1321
+//
+
+class TelaLivro7 extends StatefulWidget {
+  const TelaLivro7({Key? key}) : super(key: key);
+
+  @override
+  _TelaLivro7State createState() => _TelaLivro7State();
+}
+
+class _TelaLivro7State extends State<TelaLivro7> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAPÍTULO 1'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Container(
+            child: Text(
+                'DA nossa vida, em meio da jornada, Achei-me numa selva tenebrosa, 3 Tendo perdido a verdadeira estrada. Dizer qual era é cousa tão penosa, Desta brava espessura a asperidade, 6 Que a memória a relembra inda cuidosa. Na morte há pouco mais de acerbidade; Mas para o bem narrar lá deparado 9 De outras cousas que vi, direi verdade. Contar não posso como tinha entrado; Tanto o sono os sentidos me tomara, 12 Quando hei o bom caminho abandonado. Depois que a uma colina me cercara, Onde ia o vale escuro terminando, 15 Que pavor tão profundo me causara. Ao alto olhei, e já, de luz banhando, Vi-lhe estar às espaldas o planeta, 18 Que, certo, em toda parte vai guiando. Então o assombro um tanto se aquieta, Que do peito no lago perdurava, 21 Naquela noite atribulada, inquieta. E como quem o anélito esgotava Sobre as ondas, já salvo, inda medroso 24 Olha o mar perigoso em que lutava, O meu ânimo assim, que treme ansioso, Volveu-se a remirar vencido o espaço 27 Que homem vivo jamais passou ditoso. Tendo já repousado o corpo lasso, Segui pela deserta falda avante; 30 Mais baixo sendo o pé firme no passo. Eis da subida quase ao mesmo instante Assoma ágil e rápida pantera 33 Tendo a pele por malhas cambiante. Não se afastava de ante mim a fera; E em modo tal meu caminhar tolhia, 36 Que atrás por vezes eu tornar quisera. No céu a aurora já resplandecia, Subia o sol, dos astros rodeado, 39 Seus sócios, quando o Amor divino um dia A tais primores movimento há dado. Me infundiam desta arte alma esperança 42 Da fera o dorso alegre e mosqueado, A hora amena e a quadra doce e mansa. De um leão de repente surge o aspecto, 45 Que ao meu peito o pavor de novo lança. Gustave Doré Que me investisse então cuido inquieto; Com fome e raiva atroz fronte levanta; 48 Tremer parece o ar ao seu conspeto. Eis surge loba, que de magra espanta; De ambições todas parecia cheia; 51 Foi causa a muitos de miséria tanta! Com tanta intensa torvação me enleia Pelo terror, que o cenho seu movia, 54 Que a mente à altura não subir receia. Como quem lucro anela noite e dia, Se acaso o tempo de perder lhe chega, 57 Rebenta em pranto e triste se excrucia, A fera assim me fez, que não sossega; Pouco a pouco me investe até lançar-me 60 Lá onde o sol se cala e a luz me nega. Quando ao vale eu já ia baquear-me Alguém fraco de voz diviso perto, 63 Que após largo silêncio quer falar-me. Tanto que o vejo nesse grão deserto, — “Tem compaixão de mim” — bradei transido — 66 “Quem quer que sejas, sombra ou homem certo!” “Homem não sou” tornou-me — “mas hei sido, Pais lombardos eu tive; sempre amada 69 Mântua lhes foi; haviam lá nascido. “Nasci de Júlio em era retardada, Vivi em Roma sob o bom Augusto, 72 Quando em deuses havia a crença errada. “Poeta, decantei feitos do justo Filho de Anquíses, que de Tróia veio, 75 Depois que Ílion soberbo foi combusto. “Mas por que tornas da tristeza ao meio? Por que não vais ao deleitoso monte, 78 Que o prazer todo encerra no seu seio?” “— Oh! Virgílio, tu és aquela fonte Donde em rio caudal brota a eloqüência?” 81 Falei, curvando vergonhoso a fronte. — “Ó dos poetas lustre, honra, eminência! Valham-me o longo estudo, o amor profundo 84 Com que em teu livro procurei ciência! “És meu mestre, o modelo sem segundo; Unicamente és tu que hás-me ensinado; 87 O belo estilo que honra-me no mundo. “A fera vês que o passo me há vedado; Sábio famoso, acude ao perseguido! 90 Tremo no pulso e veias, transtornado!” Gustave Doré Respondeu, do meu pranto condoído; “Te convém outra rota de ora avante 93 Para o lugar selvagem ser vencido. “A fera, que te faz bradar tremante, Aqui passar não deixa impunemente; 96 Tanto se opõe, que mata o caminhante. “Tem tão má natureza, é tão furente, Que os apetites seus jamais sacia, 99 E fome, impando, mais que de antes sente. Yates Thompson “Com muitos animais se consorcia, Há-de a outros se unir té ser chegado 102 Lebréu, que a leve à hórrida agonia. “Por ouro ou por poder nunca tentado Saber, virtude, amor terá por norte, 105 Sendo entre Feltro e Feltro potentado. “Será da humilde Itália amparo forte, Por quem Camila a virgem dera a vida, 108 Turno Eurialo, Niso acharam morte. “Por ele, em toda parte, repelida Irá lançar-se no infernal assento, 111 Donde foi pela Inveja conduzida. “Agora, por teu prol, eu tenho o intento De levar-te comigo; ir-te-ei guiando 114 Pela estância do eterno sofrimento, “Onde, estridentes gritos escutando, Verás almas antigas em tortura 117 Segunda morte a brados suplicando. “Outros ledos verás, que, em prova dura Das chamas, inda esperam ter o gozo 120 De Deus no prêmio da imortal ventura. “Se lá subir quiseres, um ditoso Espírito melhor, te será guia, 123 Quando eu deixar-te, ao reino glorioso. “Do céu o Imperador, a rebeldia Minha à lei castigando, não consente 126 Que eu da cidade sua haja a alegria. “Em toda parte impera onipotente, Mas tem no Empíreo sua augusta sede: 129 Feliz, por ele, o eleito à glória ingente!” — “Vate, rogo-te” — eu disse — “me concede, Por esse Deus, que nunca hás conhecido, 132 Porque este e maior mal de mim se arrede. “Que, até onde disseste conduzido, À porta de São Pedro eu vá contigo E veja os maus que houveste referido”. 136 Move-se o Vate então, após o sigo....'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA LIVRO 8: O Homem sem Qualidades, Robert Musil, 1930-1943
+//
+
+class TelaLivro8 extends StatefulWidget {
+  const TelaLivro8({Key? key}) : super(key: key);
+
+  @override
+  _TelaLivro8State createState() => _TelaLivro8State();
+}
+
+class _TelaLivro8State extends State<TelaLivro8> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAPÍTULO 1'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Container(
+            child: Text(
+                'Uma pressão barométrica mínima pairava sobre o Atlântico; dirigia-se para leste, rumo à pressão máxima instalada sobre a Rússia, e ainda não mostrava tendência de se desviar dela para o norte. As isotermas e isóteras cumpriam suas funções. A temperatura do ar estava numa relação correta com a temperatura média do ano, a do mês mais Mo e a do mês mais quente e a oscilação aperiódica mensal. O nascer e o pôr do Sol e da Lua, a variação do brilho da Lua, de Vênus, do anel de Saturno, e outros fenômenos importantes transcorriam segundo as previsões dos armários de astronomia. O vapor d’água no ar estava na fase de maior distensão, a umidade era baixa. Numa frase que, embora antiquada, descreve bem as condições: era um belo dia de agosto de 1913. Automóveis emergiam disparando das ruas estreitas e fundas para a rasa claridade das praças. A mancha escura de transeuntes formava fios nevoentos. Onde riscos de velocidade maior cruzavam aquele ritmo negligente, os fios se adensavam, corriam mais depressa, retornando depois de algumas pulsações ao ritmo regular. Centenas de sons enroscavam-se, produzindo um rumor metálico do qual brotavam pontas isoladas, correndo ao longo de suas beiradas cortantes e recolhendo-se outra vez; saltavam dele lascas de tons claros, que logo sumiam esvoaçantes. Nesse rumor, sem poder defini-lo, alguém que tivesse estado ausente vários anos teria, de olhos fechados, reconhecido a capital do Império, Viena, a Residência. As cidades se reconhecem pelo andar, como as pessoas. Abrindo os olhos, o recém-chegado deduziria o mesmo da vibração do movimento nas ruas, muito antes do que de qualquer detalhe típico. Ainda que fosse só imaginação, não importa. A supervalorização da pergunta: onde estou? vem do tempo dos nômades, em que era preciso registrar os locais de pastagem. Seria importante saber por quê, ao falarmos num nariz vermelho, nos contentamos que seja vermelho, sem nos importarmos com o tom especial de vermelho, embora este possa ser descrito com exatidão em micromilímetros, pela frequência das ondas. Mas numa coisa tão mais complexa como a cidade em que nos encontramos, sempre gostaríamos de saber exatamente que cidade é. Isso nos distrai de pontos mais importantes. Portanto, não se dê valor maior ao nome da cidade. Como todas as cidades grandes, era feita de irregularidade, mudança, avanço, passo desigual, choque de coisas e acontecimentos, e, no meio disso tudo, pontos de silêncio, sem fundo; era feita de caminhos e descaminhos, de um grande pulsar rítmico e do eterno desencontro e dissonância de todos os ritmos, como uma bolha fervente pousada num recipiente feito da substância duradoura das casas, leis, ordens e tradições históricas. As duas pessoas que subiam uma rua larga e movimentada não tinham naturalmente essa impressão. Via-se que eram de uma camada privilegiada da sociedade, elegantes no vestir, na postura, no modo de conversar; as iniciais de seus nomes estavam caprichosamente bordadas em sua roupa branca; da mesma forma, sem exibição, mas na fina roupa de baixo de sua consciência, sabiam quem eram, e que seu lugar era ali, na capital e Residência. Presumindo que se chamassem Arnheim e Ermelinda Tuzzi — o que não é verdade porque em agosto a Sra. Tuzzi estava com o marido em Bad Aussee, e o Dr. Arnheim ainda em Constantinopla — deparamos com o enigma da identidade deles. Pessoas curiosas frequentemente encontram esse tipo de enigma nas ruas. A maneira como se resolvem é digna de nota. São esquecidos, caso nos próximos cinquenta passos não consigamos lembrar onde já vimos os dois. Quanto àqueles dois, eles pararam de súbito, percebendo um tumulto à frente. Já um segundo antes, alguma coisa saltara do alinhamento, obliquamente; qualquer coisa se virará, derrapara para o lado, e agora, que estava encalhada ali, com uma das rodas sobre a calçada, via-se que era um pesado caminhão, que freara bruscamente. Logo se juntaram pessoas à volta, como abelhas na entrada da colméia, uma multidão que deixava o centro livre. O motorista descera do veículo e postara-se ali no meio, cinzento como papel de embrulho, explicando o acidente com gestos desajeitados. Os que vinham olhavam para ele, depois baixavam o olhar, cautelosos, para o fundo do buraco onde haviam colocado, na beira da calçada, um homem que parecia morto. Todos admitiam que fora atropelado por estar distraído. Ajoelhavam-se junto dele, alternadamente, querendo fazer alguma coisa; abriram seu casaco, fecharam-no outra vez; tentaram sentá-lo ou, ao contrário, deitá-lo novamente; na verdade todos queriam apenas passar o tempo até que, com a ambulância, viesse uma ajuda competente e autorizada. Também aquela dama e seu acompanhante tinham chegado perto e, por cima das cabeças e costas baixadas, olhado o homem deitado. Depois recuaram e ficaram por ali, hesitantes. A dama estava com uma sensação ruim no coração e no estômago, que tinha o direito de considerar compaixão; uma sensação vaga, paralisante. Depois de algum tempo, o cavalheiro disse: — Os caminhões pesados que se usam aqui têm um tempo de freagem longo demais. A dama sentiu-se mais aliviada, e agradeceu com o olhar. Devia ter ouvido antes aquela expressão, mas não sabia o que era, nem queria saber; bastava-lhe que aquilo explicasse o terrível acidente, reduzindo-o a um problema técnico, que já não a interessava diretamente. Ouviram a sirene estridente da ambulância e todos ficaram satisfeitos com a rapidez de sua chegada. São admiráveis essas instituições sociais. Colocaram o acidentado numa maça e enfiaram-na no carro. Homens com uma espécie de uniforme cuidaram dele, e o interior do veículo, que se divisava rapidamente, parecia limpo e ordenado como um quarto de hospital. Afastaram-se quase com a justa impressão de que acontecera um fato dentro da ordem e legalidade. — Segundo as estatísticas americanas — comentou o senhor —, morrem lá anualmente 190.000 pessoas em acidentes de automóvel, e 450.000 ficam feridas. — Acha que ele está morto? — perguntou sua acompanhante, ainda com a sensação injustificada de ter visto algo fora do comum. — Espero que esteja vivo — respondeu o senhor. — Parecia vivo quando o colocaram no carro...'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA LIVRO 9: O Processo, Franz Kafka, 1925
+//
+
+class TelaLivro9 extends StatefulWidget {
+  const TelaLivro9({Key? key}) : super(key: key);
+
+  @override
+  _TelaLivro9State createState() => _TelaLivro9State();
+}
+
+class _TelaLivro9State extends State<TelaLivro9> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAPÍTULO 1'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Container(
+            child: Text(
+                'Alguém devia ter caluniado a Josef K., pois sem que ele tivesse feito qualquer mal foi detido certa manhã. A cozinheira da senhora Grubach, sua hospedeira, que todos os dias às oito horas lhe trazia o desjejum, não se apresentou no quarto de K. nessa manhã. Jamais acontecera isso. K. aguardou ainda um poucochinho, olhou, recostado em seu travesseiro, a anciã que morava em frente de sua casa e que o observava com uma curiosidade inteiramente fora do comum; depois, porém, sentindo-se ao mesmo tempo faminto e surpreso, fez soar a campainha. Imediatamente bateram em sua porta, e no dormitório entrou um homem ao qual K. jamais vira antes naquela casa. Era um tipo esbelto, porém de aspecto sólido, que vestia um traje negro e justo, o qual, semelhante a uma roupa de viagem, apresentava diversas pregas, bolsos, abas, botões e um cinto, que emprestavam à veste um ar estranhamente prático sem que, porém, pudesse estabelecer-se claramente para que serviriam todas aquelas coisas. — Quem é você? — perguntou K., erguendo-se a meio no leito. O homem, contudo, ignorou a pergunta, como se se devesse desculpar sua aparição naquela casa, e limitou-se por sua vez a indagar: — Você chamou? — Ana precisa trazer-me o desjejum — disse K., procurando estabelecer por conjetura, enquanto permanecia um momento em silêncio, quem seria aquele homem. Este, porém, não ficou muito tempo exposto aos olhares de K., mas, voltando-se para a porta, que entreabriu um pouco, disse a alguém que certamente estava por trás dela: — Quer que Ana lhe traga o desjejum. No quarto pegado seguiu-se a isto uma risota por cujo som não se poderia descobrir se correspondia a uma ou a diversas pessoas. Embora essa risota não tivesse dito ao estranho nada que ele ignorasse, este, contudo, disse a K., como um aviso: — É impossível. — Ora, esta é muito boa! — exclamou K., saltando da cama para vestir rapidamente as calças. — Verei que tipos de pessoas são as que estão na peça ao lado e como a senhora Grubach me explica esta intromissão. No mesmo instante, entretanto, ocorreu-lhe que não devia ter dito isso em voz alta porque assim reconhecia, de certo modo, o direito que o estranho tinha em vigiá-lo; no momento, porém, não deu importância ao fato. De todas as maneiras, o estranho já o entendera assim, pois lhe disse: — Não acha melhor ficar aqui? — Não quero nem ficar aqui nem falar com você até que me diga quem é. — Perguntei-lhe com boa intenção — disse o estranho, abrindo então a porta por iniciativa própria. A sala pegada, onde K. penetrou mais lentamente do que teria desejado, tinha à primeira vista quase o mesmo aspecto da noite anterior. Era o salão da senhora Grubach que talvez, com seus móveis, tapetes, porcelanas, apresentava-se um tanto mais espaçoso que de costume; isso, porém, não se percebia de imediato, tanto mais que a modificação principal era a presença de um homem, sentado à janela, com um livro do qual afastou a vista quando K. se apresentou. — Você deveria ter ficado em seu quarto. Franz não lhe disse? — Sim, mas que deseja você? — indagou K., desviando o olhar do novo personagem para fixá-lo naquele a quem acabavam de chamar Franz, que permanecia de pé junto à porta, e para tornar a dirigi-lo por fim ao outro. Através da janela aberta tornava-se a ver a anciã vizinha que, apoiada na sua, contemplava a cena com curiosidade verdadeiramente senil, como se nada devesse perder dela. — Desejo falar com a senhora Grubach — exclamou K., e fazendo um movimento como para livrar-se dos dois homens que, contudo, se encontravam a uma considerável distância dele, intentou deixar a sala. — Não — retrucou o homem que estava junto à janela, deixando o seu livro sobre uma mesinha e pondo-se de pé. — Você não pode sair; está detido. — É o que parece — disse K.—, e por quê? — perguntou depois. — Não nos cabe explicar isso. Volte para seu quarto e espere ali. O inquérito está em curso, de modo que se inteirará de tudo em seu devido tempo. Saiba que exorbito de minhas atribuições ao falar-lhe tão amistosamente. Confio, porém, em que apenas me ouça Franz, o qual, igualmente, infringindo todas as regras, mostra-se-lhe muito cordial. Se você continua tendo tanta sorte como na designação de seus guardas pode alimentar esperanças. K. quis sentar-se, porém então percebeu que em todo o salão não havia outro assento senão a poltrona que se encontrava junto à janela. — Verá logo que é verdade tudo quanto lhe dissemos — disse Franz, adiantando-se para K., em companhia do outro homem. K. ficou profundamente surpreso devido especialmente à atitude do último, que significativamente lhe deu várias palmadinhas no ombro. Ambos os homens examinaram o camisão de K. e aconselharam-lhe que vestisse uma camisa de muito pior qualidade, esclarecendo-lhe que eles se encarregariam dessa que ele vestia assim como de toda a sua roupa branca que depois lhe devolveriam no caso de que o assunto terminasse de modo favorável. — E melhor que nos confie as suas coisas — disseram — pois freqüentemente no depósito acontecem fraudes e além do mais costuma-se ali, depois de certo tempo, vender tudo sem que ninguém se incomode em verificar se o inquérito em questão terminou ou não. E quão demorados são os processos deste tipo, especialmente nos últimos tempos! Claro está que, em última instância, você receberia o dinheiro obtido da venda que certamente seria bem pouca coisa, visto que na operação o preço não é determinado pela importância da oferta, mas pelo montante do suborno; além do mais, ao passar de mão em mão, conforme a experiência o demonstra, tais somas se vão tornando a cada ano menores. K. prestou ligeira atenção a tais discursos; não emprestava grande importância ao direito, que talvez ainda possuísse, sobre suas próprias coisas; muito mais importante para ele era enxergar com clareza a situação em que se encontrava; somente que em presença desses dois homens nem mesmo podia refletir; o ventre do segundo guarda — evidentemente não podiam ser senão guardas da polícia — não cessava de apertar-se cordialmente contra ele; mas quando K. fitava o rosto do homem via que era seco, ossudo, provido de um nariz forte e torcido, e que não se enquadrava bem a seu corpo robusto e gordo, antes parecia adaptar-se melhor à figura do outro guarda. Que espécie de homens eram estes? De que estavam falando? A que departamento oficial pertenciam? Entretanto, K. vivia em um estado constitucional no qual reinava a paz, no qual todas as leis estavam em vigor, de modo que quem eram aqueles que se atreviam a invadir a sua casa? K. sempre manifestara inclinação para encarar todas as coisas com a maior ligeireza possível, em acreditar no pior somente quando o pior se apresentava, a não nutrir grandes cuidados pelo futuro mesmo quando tudo tivesse um aspecto ameaçador. Neste caso, porém, não lhe pareceu adequado levar o assunto em brincadeira; é certo que, bem considerado, tudo isto não podia deixar de ser uma brincadeira pesada, a qual, por razões desconhecidas, talvez pelo fato de que hoje K. completava trinta anos, seus colegas de banco haviam organizado; podia, certamente, tratar-se disso, e porventura não precisasse senão pôr-se a rir para que aqueles estranhos também rissem; talvez aqueles guardas não fossem senão os moços equilibristas da esquina da rua — pois, na verdade, pareciam-se com eles — aos quais teriam contratado..., e contudo K. estava, desde o primeiro instante em que vira o guarda...'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TELA LIVRO 10: O Som e a Fúria, William Faulkner, 1929
+//
+
+class TelaLivro10 extends StatefulWidget {
+  const TelaLivro10({Key? key}) : super(key: key);
+
+  @override
+  _TelaLivro10State createState() => _TelaLivro10State();
+}
+
+class _TelaLivro10State extends State<TelaLivro10> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        title: Text('CAPÍTULO 1'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(168, 137, 255, 1.0),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Container(
+            child: Text(
+                '7 de abril, 1928 Do outro lado da cerca, pelos espaços entre as flores curvas, eles estavam tacando. Eles foram para o lugar onde estava a bandeira e eu fui seguindo junto à cerca. Luster estava procurando na grama perto da árvore florida. Eles tiraram a bandeira e aí tacaram outra vez. Então puseram a bandeira de novo e foram até a mesa, e ele tacou e o outro tacou. Então eles andaram, e eu fui seguindo junto à cerca. Luster veio da árvore florida e nós seguimos junto à cerca e eles pararam e nós paramos e eu fiquei olhando através da cerca enquanto Luster procurava na grama. “Aqui, caddie.” Ele tacou. Eles atravessaram o pasto. Agarrei a cerca e fiquei olhando enquanto eles iam embora. “Que barulheira.” disse Luster. “Onde que já se viu, trinta e três ano, chorando desse jeito. Depois que eu fui até a cidade só pra comprar aquele bolo pra você. Para com essa choradeira. Por que é que você não me ajuda a procurar aquela moeda pra eu poder ir no circo hoje.” Eles estavam tacando pequenino, do outro lado do pasto. Fui 8 andando junto à cerca de volta para perto do lugar onde estava a bandeira. Ela balançava entre a grama ensolarada e as árvores. “Vamos.” disse Luster. “Aí a gente já olhou. Eles não vai voltar agora não. Vamos lá no riacho encontrar a moeda senão os negro é que vão achar ela.” Era vermelha, balançando no pasto. Então veio um passarinho descendo inclinado e pousou nela. Luster jogou. A bandeira balançava entre a grama ensolarada e as árvores. Agarrei a cerca. “Para com essa choradeira.” disse Luster. “Se eles não quer voltar eu não posso fazer nada. Se você não parar de chorar, a mamãe não vai fazer festa de aniversário pra você. Se você não parar, sabe o que eu vou fazer. Vou comer o bolo todinho. Comer as vela também. Comer as trinta e três velas. Vamos lá, vamos lá no riacho. Preciso achar minha moeda. Quem sabe a gente não acha uma bola também. Olha lá. Eles estão lá. Lá longe. Olha.” Ele veio até a cerca e apontou com o braço. “Olha só eles. Eles não volta mais aqui não. Vamos.” Seguimos junto à cerca até chegar à cerca do jardim, onde as nossas sombras estavam. A minha sombra era mais alta que a de Luster na cerca. Chegamos no lugar quebrado e passamos por ele. “Espera aí.” disse Luster. “Você prendeu naquele prego outra vez. Será que você nunca consegue passar aqui sem prender no prego.” Caddy me soltou e passamos para o outro lado. O tio Maury disse para a gente não deixar ninguém ver a gente, então é melhor a gente se abaixar, disse Caddy. Abaixa, Benjy. Assim, ó. Nós nos abaixamos e atravessamos o jardim, as flores raspando na gente e estremecendo. O chão era duro. Subimos na cerca, onde os porcos estavam grunhindo e fungando. Eles devem estar tristes porque mataram um deles hoje, disse Caddy. O chão era duro, remexido e embolotado. 9 Fica com as mãos no bolso, disse Caddy. Senão elas congelam. Você não quer ficar com as mãos congeladas no Natal, não é. “Está muito frio lá fora.” disse Versh. “Não inventa de sair não.” “O que foi.” disse a mãe. “Ele quer ir lá fora.” respondeu Versh. “Deixe ir.” disse o tio Maury. “Está muito frio.” disse a mãe. “Melhor ele ficar em casa. Benjamin. Pare com isso, já.” “Deixe, o que é que tem.” disse o tio Maury. “Benjamin.” disse a mãe. “Se você não se comportar você vai para a cozinha.” “A mamãe falou pra ele não ir na cozinha hoje não.” disse Versh. “Ela disse que tem que preparar um montão de comida.” “Deixe, Caroline.” disse o tio Maury. “Você vai piorar de tanto se preocupar com ele.” “Eu sei.” disse a mãe. “É o meu castigo. Eu acho às vezes.” “Eu sei, eu sei.” disse o tio Maury. “Você tem que poupar suas forças. Vou preparar um grogue para você.” “Isso me deixa ainda pior.” disse a mãe. “Você sabe muito bem.” “Você vai se sentir melhor.” disse o tio Maury. “Agasalhe ele bem, menino, e vá passear com ele.” O tio Maury foi embora. Versh foi embora. “Por favor, pare com isso.” disse a mãe. “Estamos tentando aprontar você para o passeio o mais depressa possível. Não quero que você fique doente.” Versh pôs em mim as galochas e o casaco, pegamos meu boné e saímos. O tio Maury estava guardando a garrafa na despensa da sala de jantar. “Fique com ele lá fora uma meia hora, menino.” disse o tio Maury. “Não saiam do quintal.” 10 “Sim, senhor.” disse Versh. “A gente nunca deixa ele ir pra rua não.” Saímos de casa. O sol estava frio e forte. “Onde que você pensa que vai.” disse Versh. “Você acha que está indo pra cidade, é.” Passamos no meio das folhas barulhentas. O portão estava frio. “Põe as mão no bolso.” disse Versh. “Se pegar no portão elas congela, e aí como é que vai ser. Devia era esperar eles em casa.” Ele pôs minhas mãos nos meus bolsos. Eu ouvia o barulho das folhas. Sentia o cheiro do frio. O portão estava frio. “Toma essas pecã. Oba. Sobe naquela árvore. Olha o esquilo, Benjy.” Peguei no portão mas não senti nada, mas sentia o cheiro forte do frio. “Põe as mão no bolso de novo.” Caddy estava andando. Depois estava corre...'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// TEXTFORMFIELD PARA ENTRADA DE DADOS
+//
+
+Widget campoTexto(rotulo, variavel, visibilidade) {
+  return Container(
+    padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+    child: TextFormField(
+      keyboardType: TextInputType.text,
+
+      // Indicar a váriavel de controle
+      controller: variavel,
+      obscureText: visibilidade,
+      decoration: InputDecoration(
+        labelText: rotulo,
+        labelStyle: TextStyle(color: Colors.black),
+        // helperText: 'Testando',
+        hintText: 'Entre com o valor',
+        /* fillColor: ,
+        focusColor: Colors.green,
+        hoverColor: Colors.black,*/
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.black,
+          ),
+        ),
+      ),
+    ),
+  );
+}
